@@ -5,6 +5,9 @@ from datetime import timedelta
 from io import BytesIO
 import xlsxwriter
 
+from functions import evaluar_dia, evaluar_semana, to_excel, load_json, analizar_comentario
+
+
 st.set_page_config(page_title="Reporte y Disponibilidad", layout="wide")
 
 # Sidebar
@@ -56,15 +59,7 @@ if seccion == "📊 Reporte de estimaciones por usuario":
                 df_final = pd.merge(df_complete, df_grouped, on=['Author', 'Start Date'], how='left')
                 df_final['Time Spent (hours)'] = df_final['Time Spent (hours)'].fillna(0)
 
-                def evaluar_dia(horas):
-                    if horas == 0:
-                        return "❌ No estimó"
-                    elif horas < 8:
-                        return "⚠️ Incumple estimativo"
-                    elif horas == 8:
-                        return "✅ Cumple estimativo"
-                    else:
-                        return "🚀 Excede estimativo"
+                
 
                 df_final['Evaluación'] = df_final['Time Spent (hours)'].apply(evaluar_dia)
 
@@ -109,15 +104,7 @@ if seccion == "📊 Reporte de estimaciones por usuario":
                 df_semanal['Días laborales'] = df_semanal['Semana Etiqueta'].map(dias_laborales_por_semana)
                 df_semanal['Horas esperadas'] = df_semanal['Días laborales'] * 8
 
-                def evaluar_semana(row):
-                    if row['Time Spent (hours)'] == 0:
-                        return "❌ No estimó en la semana"
-                    elif row['Time Spent (hours)'] < row['Horas esperadas']:
-                        return "⚠️ Incumple estimativo semanal"
-                    elif row['Time Spent (hours)'] == row['Horas esperadas']:
-                        return "✅ Cumple estimativo semanal"
-                    else:
-                        return "🚀 Excede estimativo semanal"
+                
 
                 df_semanal['Evaluación Semanal'] = df_semanal.apply(evaluar_semana, axis=1)
 
@@ -130,21 +117,12 @@ if seccion == "📊 Reporte de estimaciones por usuario":
         except Exception as e:
             st.error(f"❌ Error al procesar el archivo: {e}")
 
-def to_excel(df, nombre_hoja='Sheet1'):
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, sheet_name=nombre_hoja)
-        workbook = writer.book
-        worksheet = writer.sheets[nombre_hoja]
-        for idx, col in enumerate(df.columns):
-            column_len = max(min(df[col].astype(str).map(len).max(), 50), len(col))
-            worksheet.set_column(idx, idx, column_len + 2)
-    processed_data = output.getvalue()
-    return processed_data
+
 # -------------------------------
 # SECCIÓN 2: CONSULTA DISPONIBILIDAD
 # -------------------------------
-if seccion == "🧾 Consulta Disponibilidad":
+elif seccion == "🧾 Consulta Disponibilidad":
+    
     st.markdown("<h1 style='color:#007200'>🧾 Consulta Disponibilidad</h1>", unsafe_allow_html=True)
 
     uploaded_files = st.file_uploader(
@@ -153,8 +131,6 @@ if seccion == "🧾 Consulta Disponibilidad":
         accept_multiple_files=True,
         key="disponibilidad"
     )
-
-    
 
     if uploaded_files:
         if len(uploaded_files) > 6:
@@ -227,7 +203,9 @@ if seccion == "🧾 Consulta Disponibilidad":
 # -------------------------------
 # SECCIÓN 3: REPORTE DE GESTIÓN
 # -------------------------------
-if seccion == "📌 Reporte de gestión":
+
+elif seccion == "📌 Reporte de gestión":
+    
     st.markdown("<h1 style='color:#8700a6'>📌 Reporte de gestión</h1>", unsafe_allow_html=True)
 
     uploaded_file = st.file_uploader(
@@ -236,113 +214,40 @@ if seccion == "📌 Reporte de gestión":
         key="reporte_gestion"
     )
 
-    clasificaciones = {
-    "Desarrollo": [
-        "desarrollo", "codificación", "codificacion", "programar", "implementación", "implementacion", "tabla", "tablas", "automatizaciones", "automatizacion", "automatización",
-        "implementar", "desarollar", "logica", "lógica", "desarrollar lógica", "commits", "commit", "automatizar", "validacion tecnica", "validación tecnica", "validacion técnica",
-        "validación técnica", "nifi", "update", "add",
-        "función", "funcion", "algoritmo", "variables de entorno", "migracion", "migración", "migrar", "power bi", "queue", "web hook", "webhook", "mejoras", "mejorar",
-        "base de datos", "migraciones", "integracion", "integrar", "api", "integración", "metabase", "databricks", "tarea interna",
-        "refactorización", "refactoring", "build", "merge", "push", "pull request", "predicción", "crear", "modificar", "modificacion", "modificación",
-        "revisión de código", "revision de codigo", "revisar codigo", "endpoint", "script", "componente web", "actualización", "actualizacion", "creacion", "creación"
-    ],
-
-    "Soporte": [
-        'vpn', 'sin acceso a internet', 'sin conexion', 'canal de datos', 'internet intermitente', 'servicio de internet',
- 'agencia sin internet', "error", "bug", "errores", "data fix", "datafix", "soporte", "incidente", "falla", "fallas", "daño", "problema", "ajustar", "ajustes", "formateo", "formatear",
-        "ticket de soporte", "error en producción", "helpdesk", "debugging", "fix", "logs", "vulnerabilidad", "windows", "instalar", "inactivar", "activar", "mantenimientos",
-        "servidores", "hotfix", "ticket", "validar", "validacion", "validación","monitoreo", "sophos", "alertas", "vulnerabilidades", "darktrace", "sin servicio", "mantenimiento"
-    ],
-
-    "Análisis y diseño": [
-        "análisis", "analisis", "requerimiento", "levantamiento", "especificación", "diseño", "arquitectura",
-        "diagrama", "funcionalidad", "modelo de datos", "historias", "backlog", "mockup",
-        "user story", "historia de usuario", "propuesta", "revision tecnica", "refinamiento",
-        "flujo", "investigar", "invertigacion"
-    ],
-
-    "Reunión de seguimiento": [
-        "reunión", "reunion", "daily", "weekly", "retro", "standup", "status", "comité", "comite",
-        "sprint review", "grooming", "ceremonia", "seguimiento", "coordinar", "coordinacion",
-        "llamada con", "sesión", "seguimientos", "revisión de avance", "revisión de avances",
-        "revision de avances", "revision de avance", "avances", "control de casos", "proveedor",
-        "gestión de casos", "gestión de proyectos", "gestion de proyecto", "gestion de proyectos", "gestión de proyecto","socializacion", "socialización",
-        "planificacion", "planeacion", "planeación", "week", "weekly", "meet", "estado de proyectos", "estado de proyecto"
-    ],
-
-    "Capacitación": [
-        "capacitacion", "capacitación", "formación", "formacion", "entrenamiento", "platzi", "udemy",
-        "curso", "taller", "onboarding", "aprendizaje", "induccion", "inducción", "estudio", "estudiar",
-        "repaso", "certificación", "certificacion", "webinar", "lectura tecnica", "clase"
-    ],
-
-    "Documentación": [
-        "documentación", "documentacion", "manual de usuario", "manual tecnico", "manual funcional",
-        "manual técnico", "instructivo", "documentación técnica", "documentacion tecnica",
-        "documentación tecnica", "documentacion técnica", "wiki", "diagrama descriptivo",
-        "resumen técnico", "documentación funcional", "documentacion funcional", "gitbook", "reporte"
-    ],
-    "Pruebas": [
-        "pruebas", "test", "tests", "qa", "testeo", "casos de prueba", "testing", "test case",
-        "test cases", "fixing", "debug", "escenarios de prueba", "escenario de prueba",
-        "control de calidad", "code review", "code reviews", "prueba"
-    ],
-
-    "Disponibilidad": [
-        "en espera de asiganciones", "espera", "sin asignaciones", "sin actividad", "sin actividades",
-        "bloqueo", "inactividad", "sin asignación", "sin asignacion", "sin tareas", "sin avance",
-        "sin entregables", "pendiente", "ruta de aprendizaje", "sin requerimientos", "sin requerimiento"
-    ]
-}
-
-
-    def analizar_comentario(comentario):
-        comentario = str(comentario).lower()
-        coincidencias = set()
-
-        for categoria, palabras in clasificaciones.items():
-            for palabra in palabras:
-                if palabra in comentario:
-                    coincidencias.add(categoria)
-
-        # Elegimos la primera categoría encontrada para clasificar
-        clasificacion = list(coincidencias)[0] if coincidencias else "No clasificado"
-
-        # Si hay más de una categoría, marcar como supervisado
-        supervisado = "🚨" if len(coincidencias) > 1 else "✅"
-
-        return pd.Series([clasificacion, supervisado])
+    clasificaciones = load_json('./clasificaciones.json')
 
     if uploaded_file:
-        try:
+        try:  
             df = pd.read_excel(uploaded_file)
-
-            if 'Comment' not in df.columns or 'Issue Summary' not in df.columns:
-                st.error("❌ El archivo debe contener las columnas 'Comment' e 'Issue Summary'.")
-            else:
+            key_columns = {'Comment', 'Issue Summary'}
+            
+            if key_columns.issubset(set(df.columns)):
                 # Reemplazar comentarios vacíos por el Issue Summary
                 df['Comment'] = df['Comment'].fillna('').astype(str)
                 df['Issue Summary'] = df['Issue Summary'].fillna('').astype(str)
                 df['Comment'] = df.apply(
                     lambda row: row['Comment'] if row['Comment'].strip() else row['Issue Summary'],
-                    axis=1
-                )
+                    axis=1)
 
                 df[['Clasificación', 'Supervisado']] = df['Comment'].apply(analizar_comentario)
 
-                columnas_mostrar = ['Worklog Id', 'Issue Key', 'Issue Summary', 'Comment', 'Author' , 'Time Spent', 'Clasificación', 'Supervisado']
+                columnas_mostrar = ['Worklog Id', 'Issue Key', 'Issue Summary', 'Comment', 'Author', 'Time Spent', 'Clasificación', 'Supervisado']
                 columnas_existentes = [col for col in columnas_mostrar if col in df.columns]
                 df['Time Spent'] = df['Time Spent'].astype(float)
                 st.markdown("### 🧮 Resultados clasificados")
                 
-                excel_bytes_detalle = to_excel(df[columnas_existentes].sort_values(by='Clasificación'))
+                df = df[columnas_existentes].sort_values(by='Clasificación')
+                
+                excel_data = to_excel(df)
                 st.download_button(
                     label="📥 Descargar registros como Excel",
-                    data=excel_bytes_detalle,
+                    data=excel_data,
                     file_name="reporte_clasificacion.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
-                st.dataframe(df[columnas_existentes].sort_values(by='Clasificación'))
-
+                st.dataframe(df)
+            else:
+                st.error(f"❌ El archivo debe contener las columnas {key_columns}.")
+            
         except Exception as e:
             st.error(f"❌ Error al procesar el archivo: {e}")
