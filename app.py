@@ -230,10 +230,6 @@ elif seccion == "📌 Reporte de gestión":
                     axis=1)
 
                 df[['Clasificación', 'Supervisado']] = df['Comment'].apply(analizar_comentario)
-
-                columnas_mostrar = ['Worklog Id', 'Issue Key', 'Issue Summary', 'Comment', 'Author', 'Time Spent', 'Clasificación', 'Supervisado']
-                columnas_existentes = [col for col in columnas_mostrar if col in df.columns]
-                df['Time Spent'] = df['Time Spent'].astype(float)
                 st.markdown("### 🧮 Resultados clasificados")
                 
                 df = df[columnas_existentes].sort_values(by='Clasificación')
