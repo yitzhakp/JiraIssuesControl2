@@ -232,7 +232,7 @@ elif seccion == "📌 Reporte de gestión":
                 df[['Clasificación', 'Supervisado']] = df['Comment'].apply(analizar_comentario)
                 st.markdown("### 🧮 Resultados clasificados")
                 
-                df = df[columnas_existentes].sort_values(by='Clasificación')
+                df = df.sort_values(by='Clasificación')
                 
                 excel_data = to_excel(df)
                 st.download_button(
