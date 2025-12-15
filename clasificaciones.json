@@ -1,5 +1,5 @@
 {
-    "Desarrollo": [
+    "DEV": [
         "desarrollo",
         "codificación",
         "codificacion",
@@ -70,7 +70,7 @@
         "creacion",
         "creación"
     ],
-    "Soporte": [
+    "SOP": [
         "zscaler",
         "depuración",
         "vpn",
@@ -121,7 +121,7 @@
         "sin servicio",
         "mantenimiento"
     ],
-    "Análisis y diseño": [
+    "ANA": [
         "análisis",
         "analisis",
         "requerimiento",
@@ -144,7 +144,7 @@
         "investigar",
         "invertigacion"
     ],
-    "Reunión de seguimiento": [
+    "REU": [
         "reunión",
         "reunion",
         "daily",
@@ -186,7 +186,7 @@
         "estado de proyectos",
         "estado de proyecto"
     ],
-    "Capacitación": [
+    "CAP": [
         "capacitacion",
         "capacitación",
         "formación",
@@ -209,7 +209,7 @@
         "lectura tecnica",
         "clase"
     ],
-    "Documentación": [
+    "DOC": [
         "documentación",
         "documentacion",
         "manual de usuario",
@@ -230,7 +230,7 @@
         "reporte",
         "documentando"
     ],
-    "Pruebas": [
+    "QA": [
         "pruebas",
         "test",
         "tests",
@@ -249,7 +249,7 @@
         "code reviews",
         "prueba"
     ],
-    "Disponibilidad": [
+    "DISP": [
         "en espera de asiganciones",
         "espera",
         "sin asignaciones",
