@@ -233,7 +233,7 @@ elif seccion == "📌 Reporte de gestión":
                 st.markdown("### 🧮 Resultados clasificados")
                 
                 df = df.sort_values(by='Clasificación')
-                
+                df["final_tag"] = df["tag"].fillna(df["Clasificacion"])
                 excel_data = to_excel(df)
                 st.download_button(
                     label="📥 Descargar registros como Excel",
