@@ -229,10 +229,10 @@ elif seccion == "📌 Reporte de gestión":
                     lambda row: row['Comment'] if row['Comment'].strip() else row['Issue Summary'],
                     axis=1)
 
-                df[['Clasificación', 'Supervisado']] = df['Comment'].apply(analizar_comentario)
+                df[['Clasificacion', 'Supervisado']] = df['Comment'].apply(analizar_comentario)
                 st.markdown("### 🧮 Resultados clasificados")
                 
-                df = df.sort_values(by='Clasificación')
+                df = df.sort_values(by='Clasificacion')
                 df["final_tag"] = df["tag"].fillna(df["Clasificacion"])
                 excel_data = to_excel(df)
                 st.download_button(
